@@ -40,6 +40,17 @@ def iris_position(iris_center, right_point, left_point):
     else:
         iris_position = "left"
     return iris_position, ratio
+
+def px2mm(pixel):
+    return pixel*0.2645
+    
+def eyeDeviceDist(focal_length, iris_len_in_px ):
+    IRIS_DIA = 11
+    ir_len_mm=px2mm(iris_len_in_px)
+    return (focal_length*(IRIS_DIA/iris_len_in_px))
+
+
+eyeDeviceDist_list = []
 start=time.time()
 with mp_face_mesh.FaceMesh(max_num_faces=1, refine_landmarks=True, min_detection_confidence=0.5, min_tracking_confidence=0.5) as face_mesh:
     while True:
@@ -62,9 +73,15 @@ with mp_face_mesh.FaceMesh(max_num_faces=1, refine_landmarks=True, min_detection
             center_left = np.array([l_cx, l_cy], dtype=np.int32)
             center_right = np.array([r_cx, r_cy], dtype=np.int32)
 
+            #eye_device_distance
+            eyeDeviceDist_list.append(eyeDeviceDist(24.4,2*r_radius))
+
+
+            print()
             #desenhe o círculo com base nos valores de retorno da minEnclosingCircle, através do CIRCLE que desenha a imagem do círculo com base no centro (x, y) e no raio
             cv.circle(frame, center_left, int(l_radius), (255, 0, 255), 1, cv.LINE_AA)
             cv.circle(frame, center_right, int(r_radius), (255, 0, 255), 1, cv.LINE_AA)
+            
 
             #mostrar pontos nos cantos dos olhos
             st=(mesh_points[R_H_RIGHT[0]][0]+30,mesh_points[R_H_RIGHT][0][1]-20)
@@ -86,12 +103,17 @@ for i  in range(len(iris_list)-1):
 end_time=time.time()-start
 eye_mov_vel=tot_dist/end_time
 eyem_flag=''
-if int(eye_mov_vel) in range(20,35):
+if int(eye_mov_vel) in range(20,30):
     eyem_flag='optimal'
-elif eye_mov_vel <20:
-    eyem_flag='sub optimal'
 else:
     eyem_flag='non optimal'
+eye_DD=''
+for edd in eyeDeviceDist_list:
+    if edd in range(40,77):
+        eye_DD='optimal'
+    else:
+        eye_DD='non-optimal'
+    print(f"Eye Device Device  : {str(round(edd/10,2))} cm| Optimality : {eye_DD}")
 print(f"Eye Movement Velocity : {str(round(eye_mov_vel,2))} units per second | Optimality : {eyem_flag}")
 cap.release()
 cv.destroyAllWindows()

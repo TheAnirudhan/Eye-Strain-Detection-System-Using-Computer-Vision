@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Webpage Design</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/outlook.css') }}" />
+  </head>
+  <body>
+    <div id="magic-card" class="card">
+      <div id="magic-text" class="show-card-text">EYE STRESS<br> DETECTION</div>
+      <div id="magic-buttons" class="hide-card-button-group">
+        <form class="button" action="/html1" method = "POST">
+          <input type="submit" name="GET REFERENCE" value="getReference"></form>
+      </div>
+    </div>
+  </body>
+  <script>
+    document.getElementById("magic-card").addEventListener("mouseover", function () {
+      document.getElementById("magic-buttons").className = "show-card-button-group";
+      document.getElementById("magic-text").className = "hide-card-text";
+    });
+    document.getElementById("magic-card").addEventListener("mouseout", function () {
+      document.getElementById("magic-buttons").className = "hide-card-button-group";
+      document.getElementById("magic-text").className = "show-card-text";
+    });
+  </script>
+</html>

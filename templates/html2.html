@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>GET REFERENCE</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="AnikeSadia" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/css2.css') }}" />
+  </head>
+  <body>
+    <div class="data_part">
+      <h1>ENTER THE VALUES</h1>
+
+      <form action= "/html3"method="post">
+        <select name="comp_select0" class="Input" required>
+         
+          <option value="" selected disabled hidden><b>RECURRENCE INTERVAL</b></option>
+          <option value="3mins">3mins</option>
+          <option value="6mins">6mins</option>
+          <option value="9mins">9mins</option>
+          <option value="12mins">12mins</option>
+          <option value="15mins">15mins</option>
+          <option value="18mins">18mins</option>
+         </select>
+          <br><br><br>
+        <select name="comp_select" class="Input" required>
+          
+          <option value="none" selected disabled hidden><b>TEST DURATION </b></option>
+          <option value="3mins">03mins</option>
+          <option value="6mins">06mins</option>
+          <option value="9mins">09mins</option>
+          <option value="12mins">12mins</option>
+          <option value="15mins">15mins</option>
+          <option value="18mins">18mins</option>
+          </select
+        ><br /><br /><br /><br /><br /><br />
+
+        <a name="submit" href="/html3">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          SUBMIT
+        </a>
+      </form>
+    </div>
+  </body>
+</html>
+

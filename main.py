@@ -199,13 +199,15 @@ def getReference():
             # writing image for thumbnail drawing shape
             # cv.imwrite(f'img/frame_{frame_counter}.png', frame)
             cv.imshow('frame', frame)
+            end=time.time()-start_time
+            if(end > 5):
+                break
             key = cv.waitKey(2)
             if key==ord('q') or key ==ord('Q'):
                 break
-        end=time.time()-start_time
     return (EAR_THR, OPEN_EYE, GLAB_THR, IRIS_SIZE_PX)
-    
-def getRealtime():
+
+def getRealtime(value):
     global CEF_COUNTER
     global TOTAL_BLINKS
     global EAR_THR
@@ -288,10 +290,12 @@ def getRealtime():
             frame =utils.textWithBackground(frame,f'FPS: {round(fps,1)}',FONTS, 1.0, (30, 30), bgOpacity=0.9, textThickness=2)
             frame =utils.textWithBackground(frame,f'Eye Strain Test in Progress',FONTS, 1.0, (30, 70), bgOpacity=0.9, textThickness=2)
             cv.imshow('frame', frame)
+            end=time.time()-start_time
+            if end > value*60 :
+                break
             key = cv.waitKey(2)
             if key==ord('q') or key ==ord('Q'):
                 break
-    end=time.time()-start_time 
     blr = computeBlinkRate(end)
     Sed = computeSquintEyeDuration(ratio_list)
     Edd = computeEyeDeviceDistance(iris_list)
@@ -299,7 +303,5 @@ def getRealtime():
     Gll = computeGlabellarLength(glab_list)   
     return blr, Sed, Edd, Gll
 
+print(getRealtime(3))
 
-#print(getReference())
-
-print(getRealtime())

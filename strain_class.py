@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 # Features: screen time, distance from screen, brightness, and break frequency
 
 # Load and preprocess the data
-data = pd.read_csv("Code\eye_strain_data_1.csv")
+data = pd.read_csv("eye_strain_data_1.csv")
 
 X = data.iloc[:, :-1].values
 y = data.iloc[:, -1].values

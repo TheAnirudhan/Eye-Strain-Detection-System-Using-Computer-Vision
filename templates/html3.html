@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Page 2</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/css3.css') }}">
+  </head>
+  <body>
+    <div id=message>
+        <b>Please wait few minutes......</b>
+    </div>
+    <script>
+        setTimeout(function() {
+          document.getElementById("message").style.display = "none";
+        }, 3000); // 300000 milliseconds = 5 minutes
+    </script>
+    <div id="button" style="display:none;">
+        <a href="/html4" id="stop">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        end test
+        </a>
+    </div>
+    <script>
+        setTimeout(function() {
+          document.getElementById("button").style.display = "block";
+        }, 3000); // 300000 milliseconds = 5 minutes
+      </script>
+  </body>
+
+</html>

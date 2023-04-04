@@ -127,10 +127,10 @@ def computeEyeDeviceDistance(iris_list):
     return (np.mean(FOCAL*(12/iris_list)+10))
 
 def computeEyeMovementDuration(l_gaze, r_gaze):
-    l_gaze_res = saccademodel.fit(l_gaze)
-    l = len(l_gaze_res.saccade_points)/len(l_gaze)
-    r_gaze_res = saccademodel.fit(r_gaze)
-    r = len(r_gaze_res.saccade_points)/len(r_gaze)
+    l_gaze=np.array(l_gaze)
+    r_gaze=np.array(r_gaze)
+    l = l_gaze[0:len(l_gaze)-1] - l_gaze[1:]
+    r = r_gaze[0:len(r_gaze)-1] - r_gaze[1:]
     return ((l+r)/2)
 
 def computeGlabellarLength(glab_list):
@@ -229,7 +229,6 @@ def getRealtime(value):
             ret, frame = camera.read() # getting frame from camera 
             if not ret: 
                 break # no more frames break
-            #  resizing frame
             
             
             frame_height, frame_width= frame.shape[:2]
@@ -303,5 +302,5 @@ def getRealtime(value):
     Gll = computeGlabellarLength(glab_list)   
     return blr, Sed, Edd, Gll
 
-print(getRealtime(3))
+
 

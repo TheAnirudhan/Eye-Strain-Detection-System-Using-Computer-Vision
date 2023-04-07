@@ -4,6 +4,7 @@ import time
 import utils, math
 import numpy as np
 import saccademodel
+import matplotlib.pyplot as plt
 
 # global variables
 TEST_DURATION = 3
@@ -11,7 +12,7 @@ RECCURENCE_INTERVAL = 20
 
 EAR_THR  = 0.22
 OPEN_EYE = 0.5
-GLAB_THR = 12
+GLAB_THR = 18
 IRIS_SIZE_PX = 10
 FOCAL = 35
 
@@ -120,24 +121,28 @@ def computeSquintEyeDuration(ear):
     global OPEN_EYE
     ear=np.array(ear)
     squint_list = ear[ear < 0.6*OPEN_EYE ]
-    return (len(squint_list)/len(ear))
+    return (len(squint_list)/len(ear)), squint_list
 
 def computeEyeDeviceDistance(iris_list):
     iris_list = np.array(iris_list)
-    return (np.mean(FOCAL*(12/iris_list)+10))
+    return (np.mean(FOCAL*(12/iris_list)+10)), FOCAL*(12/iris_list)+10
 
 def computeEyeMovementDuration(l_gaze, r_gaze):
     l_gaze=np.array(l_gaze)
     r_gaze=np.array(r_gaze)
-    l = l_gaze[0:len(l_gaze)-1] - l_gaze[1:]
-    r = r_gaze[0:len(r_gaze)-1] - r_gaze[1:]
+    l = np.abs(l_gaze[0:len(l_gaze)-1] - l_gaze[1:])
+    r = np.abs(r_gaze[0:len(r_gaze)-1] - r_gaze[1:])
+    l = l[l>2]
+    r = r[r>2]
+    l = np.size(l)/len(l_gaze)
+    r = np.size(l)/len(r_gaze)
     return ((l+r)/2)
 
 def computeGlabellarLength(glab_list):
     global GLAB_THR
     glab_list = np.array(glab_list)
     glab_stress = glab_list[glab_list< GLAB_THR]
-    return (len(glab_stress)/len(glab_list))
+    return (len(glab_stress)/len(glab_list)),glab_stress
 
 def getReference():
     
@@ -206,7 +211,8 @@ def getReference():
             if key==ord('q') or key ==ord('Q'):
                 break
     return (EAR_THR, OPEN_EYE, GLAB_THR, IRIS_SIZE_PX)
-
+#ear,oe,gt,ir = getReference()
+#print("Eye Ratio Threshold : %.2f \nOpen Eye Ratio : %.2f\nGlabellar Threshold : %d\n Iris Size in Pixel : %d"%(ear,oe,gt,ir))
 def getRealtime(value):
     global CEF_COUNTER
     global TOTAL_BLINKS
@@ -295,12 +301,15 @@ def getRealtime(value):
             key = cv.waitKey(2)
             if key==ord('q') or key ==ord('Q'):
                 break
+    
     blr = computeBlinkRate(end)
-    Sed = computeSquintEyeDuration(ratio_list)
-    Edd = computeEyeDeviceDistance(iris_list)
-    #Emd = computeEyeMovementDuration(l_gaze_list, r_gaze_list)
-    Gll = computeGlabellarLength(glab_list)   
-    return blr, Sed, Edd, Gll
+    Sed,sq_lst = computeSquintEyeDuration(ratio_list)
+    Edd,Edd_list = computeEyeDeviceDistance(iris_list)
+    Emd = computeEyeMovementDuration(l_gaze_list, r_gaze_list)
+    Gll, glab_stress = computeGlabellarLength(glab_list)   
+    return blr,ratio_list, Sed, sq_lst, Edd, Edd_list, Emd, Gll, glab_list, glab_stress
+
+
 
 
 

@@ -10,6 +10,9 @@ import seaborn as sns
 # Input data: Features and Labels
 # Features: screen time, distance from screen, brightness, and break frequency
 
+def strainScore(blr,sed,emd,edd,gll):
+    score = 0.25*(1 if (blr >=15 & blr <=31)  else 0) + sed*0.15 + (1-emd)*0.15 + 0.25*(1 if (edd >=40 & edd <= 86) else 0) + (1-gll)*0.15
+    return score*100, (1 if score>=0.5 else 0)
 # Load and preprocess the data
 data = pd.read_csv("eye_strain_data_1.csv")
 
@@ -21,20 +24,9 @@ y = data.iloc[:, -1].values
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
 # Labels: Eye strain score (0: Low, 1: Moderate, 2: High)
-
+print(X_test)
 
 # Split the data into training and testing sets
-'''
-# Train the SVM model
-clf = svm.SVC(kernel='poly')
-clf.fit(X_train, y_train)
-
-
-# Create a logistic regression model and train it
-
-clf = LogisticRegression(random_state=0)
-clf.fit(X_train, y_train)
-'''
 clf = RandomForestClassifier(n_estimators=100, random_state=42)
 
 # fit the model to the training data

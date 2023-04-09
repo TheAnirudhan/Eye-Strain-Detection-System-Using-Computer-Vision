@@ -5,6 +5,7 @@ import utils, math
 import numpy as np
 import saccademodel
 import matplotlib.pyplot as plt
+from strain_class import *
 
 # global variables
 TEST_DURATION = 3
@@ -307,6 +308,14 @@ def getRealtime(value):
     Edd,Edd_list = computeEyeDeviceDistance(iris_list)
     Emd = computeEyeMovementDuration(l_gaze_list, r_gaze_list)
     Gll, glab_stress = computeGlabellarLength(glab_list)   
+    score,actual=strainScore(blr,Sed,Emd,Edd,Gll)
+    print(score)
+    y_pred = clf.predict([blr,Sed,Emd,Edd,Gll])
+    if actual :
+        print("Eye Strain Score : %d \nYour Eyes are Healthy"%(int(score)))
+    else:
+        print("Eye Strain Score : %d \nEyes Have Strain, Go relax for a bit, See nature"%(int(score)))    
+    print("Random Forest Prediction Result %d"(y_pred))
     return blr,ratio_list, Sed, sq_lst, Edd, Edd_list, Emd, Gll, glab_list, glab_stress
 
 

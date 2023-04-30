@@ -61,47 +61,14 @@ def landmarksDetection(img, results, draw=False):
 
 # Euclaidean distance 
 def euclaideanDistance(point, point1):
+    '''
+    Euclidean distance is a mathematical formula used to calculate the distance between two points in a two- or three-dimensional space. It is the straight-line distance between two points in a Cartesian coordinate system, and can be calculated using the Pythagorean theorem.
+
+    '''
     x, y = point
     x1, y1 = point1
     distance = math.sqrt((x1 - x)**2 + (y1 - y)**2)
     return distance
-
-# Blinking Ratio
-def blinkRatio(img, landmarks, right_indices, left_indices):
-
-    # Right eyes 
-    # horizontal line 
-    rh_right = landmarks[right_indices[0]]
-    rh_left = landmarks[right_indices[8]]
-    # vertical line 
-    rv_top = landmarks[right_indices[12]]
-    rv_bottom = landmarks[right_indices[4]]
-    # draw lines on right eyes 
-    # cv.line(img, rh_right, rh_left, utils.GREEN, 2)
-    # cv.line(img, rv_top, rv_bottom, utils.WHITE, 2)
-
-    # LEFT_EYE 
-    # horizontal line 
-    lh_right = landmarks[left_indices[0]]
-    lh_left = landmarks[left_indices[8]]
-
-    # vertical line 
-    lv_top = landmarks[left_indices[12]]
-    lv_bottom = landmarks[left_indices[4]]
-
-    rhDistance = euclaideanDistance(rh_right, rh_left)
-    rvDistance = euclaideanDistance(rv_top, rv_bottom)
-
-    lvDistance = euclaideanDistance(lv_top, lv_bottom)
-    lhDistance = euclaideanDistance(lh_right, lh_left)
-
-    #reRatio = rhDistance/rvDistance
-    reRatio = rvDistance/rhDistance
-    #leRatio = lhDistance/lvDistance
-    leRatio = lvDistance/lhDistance
-
-    ratio = (reRatio+leRatio)/2
-    return ratio
 
 def glabLength(landmarks, glab):
     l1 = cv.norm(landmarks[glab[0]],landmarks[glab[1]])
@@ -113,26 +80,104 @@ def irisSize(landmarks, left_iris, right_iris):
     l_size = euclaideanDistance(landmarks[left_iris[0]], landmarks[left_iris[2]])
     r_size = euclaideanDistance(landmarks[right_iris[0]],landmarks[right_iris[2]])
     return ((l_size+ r_size) / 2)
- 
+
+# Blinking Ratio
+def blinkRatio(img, landmarks, right_indices, left_indices):
+    '''
+    From facial 68 landmark points the left and eye location
+    points (36-48) are extracted.
+    To measure a metric for opening and closing of eye we
+    use a distance metric which is simply
+    
+    Eye Aspect Ratio = VERTICAL DISTANCE / HORIZONTAL DISTANCE
+
+    When the EAR is below a threshold level and then returns
+    back to previous level, the blink is being detected
+    img: The input image on which the landmarks are detected.
+    landmarks: A list of 68 facial landmarks detected in the input image. The landmarks are represented as (x, y) coordinates.
+    right_indices: A list of indices of the facial landmarks corresponding to the right eye.
+    left_indices: A list of indices of the facial landmarks corresponding to the left eye.
+    rh_right: The landmark corresponding to the outer right corner of the right eye.
+    rh_left: The landmark corresponding to the outer left corner of the right eye.
+    rv_top: The landmark corresponding to the top midpoint of the right eye.
+    rv_bottom: The landmark corresponding to the bottom midpoint of the right eye.
+    lh_right: The landmark corresponding to the outer right corner of the left eye.
+    lh_left: The landmark corresponding to the outer left corner of the left eye.
+    lv_top: The landmark corresponding to the top midpoint of the left eye.
+    lv_bottom: The landmark corresponding to the bottom midpoint of the left eye.
+    rhDistance: The horizontal distance between the outer right and left corners of the right eye.
+    rvDistance: The vertical distance between the top and bottom midpoints of the right eye.
+    lvDistance: The vertical distance between the top and bottom midpoints of the left eye.
+    lhDistance: The horizontal distance between the outer right and left corners of the left eye.
+    reRatio: The eye aspect ratio (EAR) of the right eye, calculated as the vertical distance divided by the horizontal distance.
+    leRatio: The EAR of the left eye, calculated as the vertical distance divided by the horizontal distance.
+    ratio: The average of the EARs of the right and left eyes, used as a measure of the opening and closing of the eyes (blinking).
+    '''
+    # RIGHT_EYE 
+    # horizontal 
+    rh_right = landmarks[right_indices[0]]
+    rh_left = landmarks[right_indices[8]]
+    # vertical 
+    rv_top = landmarks[right_indices[12]]
+    rv_bottom = landmarks[right_indices[4]]
+    # euclaideanDistance
+    rhDistance = euclaideanDistance(rh_right, rh_left)
+    rvDistance = euclaideanDistance(rv_top, rv_bottom)
+    
+    reRatio = rvDistance/rhDistance # The eye aspect ratio (EAR) of the right eye
+
+    # LEFT_EYE 
+    # horizontal  
+    lh_right = landmarks[left_indices[0]]
+    lh_left = landmarks[left_indices[8]]
+    # vertical  
+    lv_top = landmarks[left_indices[12]]
+    lv_bottom = landmarks[left_indices[4]]
+    # euclaideanDistance
+    lvDistance = euclaideanDistance(lv_top, lv_bottom)
+    lhDistance = euclaideanDistance(lh_right, lh_left)
+    
+    leRatio = lvDistance/lhDistance # The eye aspect ratio (EAR) of the left eye
+
+    # draw lines on right eyes                                  # debug
+    # cv.line(img, rh_right, rh_left, utils.GREEN, 2)
+    # cv.line(img, rv_top, rv_bottom, utils.WHITE, 2)
+
+
+    ratio = (reRatio+leRatio)/2
+    return ratio
+
+# Feature 1
 def computeBlinkRate(duration):
     global TOTAL_BLINKS
     return (TOTAL_BLINKS*60/duration)
 
+# Feature 2
 def computeSquintEyeDuration(ear):
     global OPEN_EYE
     ear=np.array(ear)
     squint_list = ear[ear < 0.6*OPEN_EYE ]
     return (len(squint_list)/len(ear)), squint_list
 
+# Feature 3
 def computeEyeDeviceDistance(iris_list):
     iris_list = np.array(iris_list)
     return (np.mean(FOCAL*(12/iris_list)+10)), FOCAL*(12/iris_list)+10
 
 def computeEyeMovementDuration(l_gaze, r_gaze):
+    '''
+    This function computes the duration of eye movement by taking the gaze coordinates of the left and right eyes as input.
+
+    First, the function converts the gaze coordinates of both eyes into numpy arrays. Then, it calculates the absolute difference between consecutive gaze points for both eyes.
+
+    Next, it filters out the gaze points that have a difference less than or equal to 2 (which are considered to be noise). After that, it calculates the proportion of filtered gaze points to the total number of gaze points for each eye.
+
+    Finally, it calculates the average of the proportion of gaze points that pass the filter for the left and right eyes and returns the result as the duration of eye movement.
+    '''
     l_gaze=np.array(l_gaze)
     r_gaze=np.array(r_gaze)
-    l = np.abs(l_gaze[0:len(l_gaze)-1] - l_gaze[1:])
-    r = np.abs(r_gaze[0:len(r_gaze)-1] - r_gaze[1:])
+    l = np.abs(l_gaze[0:-1] - l_gaze[1:])
+    r = np.abs(r_gaze[0:-1] - r_gaze[1:])
     l = l[l>2]
     r = r[r>2]
     l = np.size(l)/len(l_gaze)
@@ -152,11 +197,11 @@ def getReference():
     global GLAB_THR 
     global IRIS_SIZE_PX 
     global FOCAL
+
     print(EAR_THR,OPEN_EYE,GLAB_THR,IRIS_SIZE_PX,FOCAL)
     ratio_list = []
     frame_counter = 0
     with map_face_mesh.FaceMesh(max_num_faces=1, refine_landmarks=True, min_detection_confidence=0.5, min_tracking_confidence=0.5) as face_mesh:
-
         # starting time here 
         start_time = time.time()
         # starting Video loop here.
@@ -220,7 +265,7 @@ def getRealtime(value):
     global EAR_THR
 
     frame_counter = 0
-    ratio_list=[]
+    blink_ratio_list=[]
     iris_list=[]
     glab_list =[]
     l_gaze_list=[]
@@ -235,7 +280,7 @@ def getRealtime(value):
             frame_counter = frame_counter + 1
             ret, frame = camera.read() # getting frame from camera 
             if not ret: 
-                break # no more frames break
+                break # no more frames, break
             
             
             frame_height, frame_width= frame.shape[:2]
@@ -244,11 +289,11 @@ def getRealtime(value):
             if results.multi_face_landmarks:
             
                 mesh_coords=np.array([np.multiply([p.x, p.y], [frame_width, frame_height]).astype(int) for p in results.multi_face_landmarks[0].landmark])
-                ratio = blinkRatio(frame, mesh_coords, RIGHT_EYE, LEFT_EYE) # EAR
+                blink_ratio = blinkRatio(frame, mesh_coords, RIGHT_EYE, LEFT_EYE) # EAR
                 iris = irisSize(mesh_coords,LEFT_IRIS,RIGHT_IRIS)           # Eye device Distance
                 glab = glabLength(mesh_coords,GLABELLAR)                    # glabellar distance
             
-                ratio_list.append(ratio)
+                blink_ratio_list.append(blink_ratio)
                 iris_list.append(iris)
                 glab_list.append(glab)
 
@@ -272,7 +317,7 @@ def getRealtime(value):
                 l_gaze_list.append(l_eye_gaze)
                 r_gaze_list.append(r_eye_gaze)
 
-                if ratio < EAR_THR:
+                if blink_ratio < EAR_THR:
                     CEF_COUNTER +=1
                     # cv.putText(frame, 'Blink', (200, 50), FONTS, 1.3, utils.PINK, 2)
                     utils.colorBackgroundText(frame,  f'Blink', FONTS, 1.7, (int(frame_height/2), 100), 2, utils.YELLOW, pad_x=6, pad_y=6, )
@@ -287,7 +332,7 @@ def getRealtime(value):
                 cv.polylines(frame,  [np.array([mesh_coords[p] for p in RIGHT_EYE ], dtype=np.int32)], True, utils.GREEN, 1, cv.LINE_AA)
 
                 # cv.putText(frame, f'ratio {ratio}', (100, 100), FONTS, 1.0, utils.GREEN, 2)
-                utils.colorBackgroundText(frame,  f'Ratio : {round(ratio,2)}', FONTS, 0.7, (30,100),2, utils.PINK, utils.YELLOW)
+                utils.colorBackgroundText(frame,  f'Ratio : {round(blink_ratio,2)}', FONTS, 0.7, (30,100),2, utils.PINK, utils.YELLOW)
                 cv.polylines(frame,  [np.array([mesh_coords[p] for p in LEFT_EYE ], dtype=np.int32)], True, utils.GREEN, 1, cv.LINE_AA)
                 cv.polylines(frame,  [np.array([mesh_coords[p] for p in RIGHT_EYE ], dtype=np.int32)], True, utils.GREEN, 1, cv.LINE_AA)
             # calculating  frame per seconds FPS
@@ -304,7 +349,7 @@ def getRealtime(value):
                 break
     
     blr = computeBlinkRate(end)
-    Sed,sq_lst = computeSquintEyeDuration(ratio_list)
+    Sed,sq_lst = computeSquintEyeDuration(blink_ratio_list)
     Edd,Edd_list = computeEyeDeviceDistance(iris_list)
     Emd = computeEyeMovementDuration(l_gaze_list, r_gaze_list)
     Gll, glab_stress = computeGlabellarLength(glab_list)   
@@ -316,7 +361,7 @@ def getRealtime(value):
     else:
         print("Eye Strain Score : %d \nEyes Have Strain, Go relax for a bit, See nature"%(int(score)))    
     print("Random Forest Prediction Result %d"(y_pred))
-    return blr,ratio_list, Sed, sq_lst, Edd, Edd_list, Emd, Gll, glab_list, glab_stress
+    return blr,blink_ratio_list, Sed, sq_lst, Edd, Edd_list, Emd, Gll, glab_list, glab_stress
 
 
 

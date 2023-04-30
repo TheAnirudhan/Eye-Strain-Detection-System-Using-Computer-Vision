@@ -79,8 +79,8 @@ with mp_face_mesh.FaceMesh(max_num_faces=1, refine_landmarks=True, min_detection
 
             print()
             #desenhe o círculo com base nos valores de retorno da minEnclosingCircle, através do CIRCLE que desenha a imagem do círculo com base no centro (x, y) e no raio
-            cv.circle(frame, center_left, int(l_radius), (255, 0, 255), 1, cv.LINE_AA)
-            cv.circle(frame, center_right, int(r_radius), (255, 0, 255), 1, cv.LINE_AA)
+            cv.circle(frame, center_left, int(l_radius), (0, 0, 255), 5, cv.LINE_AA)
+            cv.circle(frame, center_right, int(r_radius), (0, 0, 255), 5, cv.LINE_AA)
             
 
             #mostrar pontos nos cantos dos olhos
